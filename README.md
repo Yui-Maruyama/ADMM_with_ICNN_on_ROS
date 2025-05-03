@@ -1,2 +1,2 @@
-# ADMM_with_ICNN
-ADMMを使用してICNNでモデリングされるスコアの最適化を行うためのプログラム
+# ADMM_with_ICNN_on_ROS
+ADMMを使用してICNNでモデリングされるスコアの最適化を行うためのプログラムをROS上で実装
