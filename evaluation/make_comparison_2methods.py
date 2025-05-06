@@ -159,6 +159,6 @@ plt.plot(range(num_usr_min, num_usr_max + 1), converged_times_centralized, label
 plt.xlabel('number of users')
 plt.ylabel('convergence time (s)')
 plt.legend()
-plt.savefig(f"../graph/convergence_time_updated.pdf", bbox_inches='tight')
+plt.savefig(f"../graph/convergence_time.pdf", bbox_inches='tight')
 
 plt.show()
