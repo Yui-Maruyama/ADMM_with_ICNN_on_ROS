@@ -4,14 +4,14 @@ import matplotlib.pyplot as plt
 from scipy.spatial.distance import cdist
 
 # パラメータ
-num_points = 100
+num_points = 10
 min_dist = 1.0
 max_dist = 50.0
-neighbor_threshold = 10.0  # 距離10以下の点を記録
+neighbor_threshold = 20.0  # 距離10以下の点を記録
 max_attempts_per_point = 1000
 area_size = 100
 
-seed = np.random.seed(1)
+random.seed(114514)
 
 # 点リスト初期化 (1点目を固定)
 points = [np.array([0.0, 0.0])]
@@ -52,7 +52,7 @@ plt.show()
 distances = cdist(points, points)
 np.fill_diagonal(distances, np.inf)  # 自分自身との距離は除外
 
-with open(f"neighbors_{num_points}.txt", "w") as f:
+with open(f"../neighbors_{num_points}.txt", "w") as f:
     for i in range(len(points)):
         neighbors = [str(j) for j in range(len(points)) if distances[i][j] <= neighbor_threshold]
         line = f", ".join(neighbors) + "\n"
