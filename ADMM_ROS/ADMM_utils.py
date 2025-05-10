@@ -1,15 +1,10 @@
 import numpy as np
 import copy
 import torch
-import torch.nn as nn
-import torch.optim as optim
-from torch.optim.lr_scheduler import StepLR
-import time
-import matplotlib.pyplot as plt
-import psutil
-import sys
+import rclpy
+from std_msgs.msg import Float32
 
-def local_optimize(id, x, other_usages, mu, s, rho, optimizer, model, user_list, max_capacities, iter_inner = 1, ctx = torch.tensor(1)):   # ローカル最適化
+def local_optimize(id, x, other_usages, mu, s, rho, optimizer, model, user_list, max_capacities, bandwidth, iter_inner = 1, ctx = torch.tensor(1)):   # ローカル最適化
     # id: そのユーザのID
     # x: そのユーザのオブジェクトのパラメータ
     # other_usages: 他ユーザ（近隣ユーザ全員分）の
@@ -22,8 +17,6 @@ def local_optimize(id, x, other_usages, mu, s, rho, optimizer, model, user_list,
 
     for i in range(iter_inner):
         # optimization_start_time = time.time()
-
-        val = 0
         optimizer.zero_grad()  # 勾配のリセット
         
         param = x
@@ -33,24 +26,38 @@ def local_optimize(id, x, other_usages, mu, s, rho, optimizer, model, user_list,
         # 他のユーザーとの制約を追加
         for j in user_list:
             other_usage = other_usages[j].clone().detach()
-            val = val + mu[j] * (g_ij(id, param, max_capacities[i], other_usages[j]) + s[id][j])
-            val = val + (0.5 * rho) * ((g_ij(id, param, max_capacities[i], other_usages[j]) + s[id][j]) ** 2)
+            # print(j)
+            # print(mu[j])
+            # print(other_usage)
+            # print(f"bandwidth constraint between user {id} and {j}", bandwidth[j])
+            # print(s[j])
+            # print(val.dtype)
+            # print(mu[j].dtype)
+            # print((g_ij(id, param, max_capacities, other_usage, bandwidth[j]) + s[j]).dtype)
+            gij_val = g_ij(id, param, max_capacities, other_usage, bandwidth[j])
+            val = val + mu[j] * (gij_val + s[j])
+            val = val + (0.5 * rho) * ((gij_val + s[j]) ** 2)
 
         loss = val.sum()
         
+        # loss.backward(retain_graph=True)
         loss.backward()
 
+        # print(f"user {id}'s parameter before update: {x}")
         optimizer.step()  # パラメータの更新
+        # print(f"user {id}'s parameter after update: {x}")
 
         #パラメータのクリッピング
         with torch.no_grad():
-            x.copy_(param)
-            x.clamp_(min=0.0, max=1.0)
+            x.copy_(x.clamp(min=0.0, max=1.0))
+            # x.clamp_(min=0.0, max=1.0)
 
-        return x
+        # print(f"User {id}'s parameter: ", x)
+
+    return x.detach()
 
 
-def g_ij(i, parami, max_capacities, other_usage, bandwidth):
+def g_ij(id, x, max_capacities, other_usage, bandwidth):
     # i:ユーザID
     # parami: そのユーザのパラメータ
     # max_capacities: そのユーザの空間のオブジェクトの最大容量のリスト
@@ -59,19 +66,24 @@ def g_ij(i, parami, max_capacities, other_usage, bandwidth):
     # bandwidth: 対象ユーザとの間の通信路の最大容量
 
     # 定数の計算を一度だけ行う（単位を揃えるため？要検証）
-    scaling_factor = 10.0 / 1000
+    # scaling_factor = 10.0 / 1000
 
     # dri, fri, drj, frj をテンソルとして取得
     # drはダウンサンプリングレート、frはフレームレート（元のパラメータでは交互に置かれている）
-    dri = parami[::2]
-    fri = parami[1::2]
+    dri = x[::2]
+    fri = x[1::2]
 
     # num_objects[i] と max_capacities[i] に対応する部分のテンソル計算
-    val_i = (max_capacities * dri * fri).sum() * scaling_factor
+    val_i = (max_capacities * dri * fri).sum()
     # val_j = (max_capacities[scenes[j] - 1][:num_objects[j]] * drj * frj).sum() * scaling_factor
 
     # 合計値を計算してバンド幅を引く
     val = (val_i + other_usage - bandwidth)
+
+    # print(f"user {id}'s ds rates: {dri}")
+    # print(f"user {id}'s frame rates: {fri}")
+    # print(f"other_usage: {other_usage}, bandwidth_constraint with the user: {bandwidth}")
+    # print(f"user {id}'s constraint value: {val}")
 
     return val
 
@@ -104,7 +116,7 @@ def g_ij(i, parami, max_capacities, other_usage, bandwidth):
 #     optimization_time += sum(optimization_times)
 
 
-def update_s(id, s, mu, x, other_usages, user_list, max_capacities, scene_i, rho):
+def update_s(id, s, mu, x, other_usages, user_list, max_capacities, scene_i, rho, bandwidth):
     # id: ユーザID
     # s: 自身と周囲のユーザとのパラメータsの値
     # mu: μ、ラグランジュ関数の項の係数
@@ -115,19 +127,18 @@ def update_s(id, s, mu, x, other_usages, user_list, max_capacities, scene_i, rho
     # scene_i: そのユーザのシーンID
     # rho: ρ、拡張ラグランジュ関数の項のウェイト
 
-    updated_s = s.clone().detach()
+    # updated_s = s.clone().detach()
+    updated_s = {user_id: tensor.detach().clone().requires_grad_(False) for user_id, tensor in s.items()}
     for i in user_list:
         # update_value = max(0, updated_s[i, j] - (g_ij(i, j, x[indexes[i] : indexes[i + 1]], x[indexes[j] : indexes[j + 1]]) + updated_s[i, j]) - (mu[i, j] / rho))
-        update_value = max(0, updated_s[i] - (g_ij(id, x, max_capacities, scene_i, other_usages[i]) + updated_s[i]) - (mu[i] / rho))
+        update_value = updated_s[i] - (g_ij(id, x, max_capacities, other_usages[i], bandwidth[i]).detach() + updated_s[i]) - (mu[i] / rho)
+        update_value = update_value.clamp(min=0)
         updated_s[i] = update_value
-    
-    # print(g_ij(0, 1, x[0].clone().detach(), x[1].clone().detach()), updated_s)
-    # print(updated_s)
                 
     return updated_s
 
 
-def update_mu(id, s, x, mu, max_capacities, user_list, scene_i, other_usages):
+def update_mu(id, s, x, mu, max_capacities, user_list, scene_i, other_usages, bandwidth):
     # id: ID
     # s: パラメータs
     # x: パラメータx
@@ -136,13 +147,12 @@ def update_mu(id, s, x, mu, max_capacities, user_list, scene_i, other_usages):
     # scene_i: そのユーザのシーンID
     # other_usage: 他ユーザの通信路使用量
 
-    updated_mu = mu.clone().detach()
+    # updated_mu = mu.clone().detach()
+    updated_mu = {user_id: tensor.detach().clone().requires_grad_(False) for user_id, tensor in mu.items()}
     for i in user_list:
         # update_value = mu[i][j] + g_ij(i, j, x[indexes[i] : indexes[i + 1]], x[indexes[j] : indexes[j + 1]]) + s[i][j]
-        update_value = mu[i] + g_ij(id, x, max_capacities, scene_i, other_usages[i]) + s[i]
+        update_value = mu[i] + g_ij(id, x, max_capacities, other_usages[i], bandwidth[i]).detach() + s[i]
         updated_mu[i] = update_value
-
-        # print(g_ij(i, j, x[i].clone().detach(), x[j].clone().detach()) + s[i][j])
 
     return updated_mu
 
@@ -153,14 +163,14 @@ def update_score(model, x, mu, s, x_list, mu_list, s_list, scores, file_path, ti
     scores.append(score)
 
     # x_list.append(copy.deepcopy( x.detach().numpy() ))
-    x_list.append(copy.deepcopy( x.detach().numpy() ))
-    mu_list.append(copy.deepcopy(mu.detach().numpy()))
-    s_list.append(copy.deepcopy(s.detach().numpy()))
+    x_list.append(copy.deepcopy(x.detach().numpy()))
+    mu_list.append(copy.deepcopy({user_id: tensor.detach() for user_id, tensor in mu.items()}))
+    s_list.append(copy.deepcopy({user_id: tensor.detach() for user_id, tensor in s.items()}))
     # total_scores.append(sum_score)
 
     # スコアをファイルに保存したい、後で追加
     with open(file_path, mode = 'a') as f:
-        f.write(f"{time}, {score}")
+        f.write(f"time: {time}, score: {score}\n")
 
     return scores, x_list, mu_list, s_list
 
@@ -203,8 +213,14 @@ def publish_usage(i, parami, max_capacities, other_usage, pub):
     val_i = (max_capacities * dri * fri).sum()
     # val_j = (max_capacities[scenes[j] - 1][:num_objects[j]] * drj * frj).sum() * scaling_factor
 
-    # 合計値を計算
-    val = val_i + other_usage
+    # トピックに配信するメッセージの作成
+    msg = Float32()
+    msg.data = float(val_i.item())
+
+    # print(f"user {i}'s max capacity: {max_capacities}")
+    # print(f"user {i}'s ds rate: {dri}")
+    # print(f"user {i}'s frame rate: {fri}")
+    # print(f"user {i}'s usage: {msg.data}")
 
     # トピックにパブリッシュ
-    pub.publish(val)
+    pub.publish(msg)
