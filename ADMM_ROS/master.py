@@ -42,8 +42,8 @@ def main():
             if i == j:
                 bandwidth[i][j] = 99999
             else:
-                bandwidth[i][j] = b
-                bandwidth[j][i] = b
+                bandwidth[i][j] = b / 1000
+                bandwidth[j][i] = b / 1000
                 # print(f"bandwidth constraint with user {i} and user {j}", bandwidth[i][j])
     
     # 各ユーザのノードを作成

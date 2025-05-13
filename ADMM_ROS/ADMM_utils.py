@@ -4,7 +4,7 @@ import torch
 import rclpy
 from std_msgs.msg import Float32
 
-def local_optimize(id, x, other_usages, mu, s, rho, optimizer, model, user_list, max_capacities, bandwidth, iter_inner = 1, ctx = torch.tensor(1)):   # ローカル最適化
+def local_optimize(id, x, other_usages, mu, s, rho, optimizer, model, user_list, max_capacities, bandwidth, iter_inner = 3, ctx = torch.tensor(1)):   # ローカル最適化
     # id: そのユーザのID
     # x: そのユーザのオブジェクトのパラメータ
     # other_usages: 他ユーザ（近隣ユーザ全員分）の
@@ -52,7 +52,8 @@ def local_optimize(id, x, other_usages, mu, s, rho, optimizer, model, user_list,
             x.copy_(x.clamp(min=0.0, max=1.0))
             # x.clamp_(min=0.0, max=1.0)
 
-        # print(f"User {id}'s parameter: ", x)
+        if id == 7:
+            print(f"User {id}'s parameter: ", x)
 
     return x.detach()
 
@@ -66,7 +67,7 @@ def g_ij(id, x, max_capacities, other_usage, bandwidth):
     # bandwidth: 対象ユーザとの間の通信路の最大容量
 
     # 定数の計算を一度だけ行う（単位を揃えるため？要検証）
-    # scaling_factor = 10.0 / 1000
+    scaling_factor = 10.0 / 1000
 
     # dri, fri, drj, frj をテンソルとして取得
     # drはダウンサンプリングレート、frはフレームレート（元のパラメータでは交互に置かれている）
@@ -74,7 +75,7 @@ def g_ij(id, x, max_capacities, other_usage, bandwidth):
     fri = x[1::2]
 
     # num_objects[i] と max_capacities[i] に対応する部分のテンソル計算
-    val_i = (max_capacities * dri * fri).sum()
+    val_i = (max_capacities * dri * fri).sum() * scaling_factor
     # val_j = (max_capacities[scenes[j] - 1][:num_objects[j]] * drj * frj).sum() * scaling_factor
 
     # 合計値を計算してバンド幅を引く
@@ -175,12 +176,12 @@ def update_score(model, x, mu, s, x_list, mu_list, s_list, scores, file_path, ti
     return scores, x_list, mu_list, s_list
 
 
-def is_converged(scores, iter, window_size=20, tol=1e-8):   #収束判定
+def is_converged(scores, iter, window_size=20, tol=1e-5):   #収束判定
     ret1 = False
     if(iter > window_size):   # 過去一定ステップ（デフォルト：20）の移動平均が1e-8以下の場合収束
         ma_now = np.sum([scores[len(scores) - window_size : len(scores)]]) / window_size
         ma_previous = np.sum([scores[len(scores) - window_size - 1 : len(scores) - 1]]) / window_size
-        print("moving average: ", ma_now)
+        # print("moving average: ", ma_now)
         if (abs(ma_now / ma_previous - 1) < tol and ma_now > 0):
             ret1 = True
     else:
@@ -196,7 +197,7 @@ def is_converged(scores, iter, window_size=20, tol=1e-8):   #収束判定
     return ret1 and ret2
 
 
-def publish_usage(i, parami, max_capacities, other_usage, pub):
+def publish_usage(node, parami, max_capacities, other_usage, pub):
     # i:ユーザID
     # parami: そのユーザのパラメータ
     # max_capacities: そのユーザの空間のオブジェクトの最大容量のリスト
@@ -224,3 +225,5 @@ def publish_usage(i, parami, max_capacities, other_usage, pub):
 
     # トピックにパブリッシュ
     pub.publish(msg)
+    # if node.user_id == 4:
+    node.get_logger().info(f'Published from user_{node.user_id}: {msg.data}')

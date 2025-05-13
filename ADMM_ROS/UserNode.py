@@ -6,7 +6,6 @@ import threading
 import time
 from PICNN import myPICNN
 import random
-import time
 import torch
 import torch.optim as optim
 from ADMM_utils import *
@@ -90,7 +89,8 @@ class UserNode(Node):
 
     def create_callback(self, other_user_id):
         def callback(msg):
-            self.get_logger().info(f'Received from user_{other_user_id}: {msg.data}')
+            if self.user_id == 100:
+                self.get_logger().info(f'Received from user_{other_user_id}: {msg.data}')
         return callback
 
     def optimization_loop(self):
@@ -112,7 +112,7 @@ class UserNode(Node):
             self.scores, self.x_list, self.mu_list, self.s_list = update_score(self.model, self.x, self.mu, self.s, self.x_list, self.mu_list, self.s_list, self.scores, self.result_file_name, time.time() - self.start_time, ctx = torch.tensor(1))
 
             # パラメータをトピックに配信
-            publish_usage(self.user_id, self.x, self.max_capacity, self.other_usages, self.publisher)
+            publish_usage(self, self.x, self.max_capacity, self.other_usages, self.publisher)
 
             # 今は単にスリープ
             # time.sleep(1.0)
@@ -123,4 +123,10 @@ class UserNode(Node):
         msg.data = self.user_id
         self.finished_pub.publish(msg)
         self.get_logger().info(f"User {self.user_id} finished. Shutting down.")
+        # 1s 後に安全に destroy
+        # self.create_timer(1.0, self._safe_shutdown)
+        self.destroy_node()
+
+
+    def _safe_shutdown(self):
         self.destroy_node()
