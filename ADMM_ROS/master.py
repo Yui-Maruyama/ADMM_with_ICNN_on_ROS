@@ -26,7 +26,8 @@ class ManagerNode(Node):
 
 def main():
     num_usr = 10   #ユーザ数
-    np.random.seed(114514)
+    np.random.seed(1)
+    scenes = [np.random.randint(1, 4) for _ in range(num_usr)]
 
     rclpy.init()
 
@@ -49,7 +50,7 @@ def main():
     # 各ユーザのノードを作成
     nodes = []
     for user_id in user_list:
-        node = UserNode(user_id, neighbors[user_id], num_usr, bandwidth[i])
+        node = UserNode(user_id, neighbors[user_id], num_usr, bandwidth[user_id], scenes[user_id])
         nodes.append(node)
 
     # 終了条件の管理用ノード

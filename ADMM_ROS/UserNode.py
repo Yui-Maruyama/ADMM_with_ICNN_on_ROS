@@ -5,14 +5,13 @@ from std_msgs.msg import Int32
 import threading
 import time
 from PICNN import myPICNN
-import random
 import time
 import torch
 import torch.optim as optim
 from ADMM_utils import *
 
 class UserNode(Node):
-    def __init__(self, user_id: int, user_list: list, total_users: int, bandwidth):
+    def __init__(self, user_id: int, user_list: list, total_users: int, bandwidth, scene):
         super().__init__(f'user_{user_id}')
         self.user_id = user_id
         self.neighbor = user_list
@@ -33,8 +32,7 @@ class UserNode(Node):
         self.finished_pub = self.create_publisher(Int32, "finished_users", 10)
 
         # シーンとモデルの初期化
-        random.seed(self.user_id)
-        self.scene = random.randint(1, 3)
+        self.scene = scene
         match self.scene:
             case 1:
                 self.model = myPICNN(22, 10, 100)
