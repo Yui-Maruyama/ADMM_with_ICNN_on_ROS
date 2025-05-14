@@ -1,0 +1,22 @@
+[1.111s] Invoking command in '/mnt/c/research/program/ADMM_with_ICNN_on_ROS/my_package': PS1=(myenv) \[\e]0;\u@\h: \w\a\]${debian_chroot:+($debian_chroot)}\[\033[01;32m\]\u@\h\[\033[00m\]:\[\033[01;34m\]\w\[\033[00m\]\$ PYTHONPATH=/mnt/c/research/program/ADMM_with_ICNN_on_ROS/my_package/build/my_package/prefix_override:/usr/lib/python3/dist-packages/colcon_core/task/python/colcon_distutils_commands:/mnt/c/research/program/ADMM_with_ICNN_on_ROS/my_package/install/my_package/lib/python3.12/site-packages:${PYTHONPATH} VIRTUAL_ENV_PROMPT=(myenv) /usr/bin/python3 -W ignore:setup.py install is deprecated -W ignore:easy_install command is deprecated setup.py egg_info --egg-base build/my_package build --build-base /mnt/c/research/program/ADMM_with_ICNN_on_ROS/my_package/build/my_package/build install --record /mnt/c/research/program/ADMM_with_ICNN_on_ROS/my_package/build/my_package/install.log --single-version-externally-managed install_data
+[1.516s] running egg_info
+[1.531s] writing build/my_package/my_package.egg-info/PKG-INFO
+[1.535s] writing dependency_links to build/my_package/my_package.egg-info/dependency_links.txt
+[1.538s] writing entry points to build/my_package/my_package.egg-info/entry_points.txt
+[1.541s] writing requirements to build/my_package/my_package.egg-info/requires.txt
+[1.543s] writing top-level names to build/my_package/my_package.egg-info/top_level.txt
+[1.594s] reading manifest file 'build/my_package/my_package.egg-info/SOURCES.txt'
+[1.640s] writing manifest file 'build/my_package/my_package.egg-info/SOURCES.txt'
+[1.642s] running build
+[1.643s] running build_py
+[1.688s] running install
+[1.697s] running install_lib
+[1.852s] running install_data
+[1.874s] copying launch/launcher.py -> /mnt/c/research/program/ADMM_with_ICNN_on_ROS/my_package/install/my_package/share/my_package/launch
+[1.892s] running install_egg_info
+[1.912s] removing '/mnt/c/research/program/ADMM_with_ICNN_on_ROS/my_package/install/my_package/lib/python3.12/site-packages/my_package-0.0.0-py3.12.egg-info' (and everything under it)
+[1.947s] Copying build/my_package/my_package.egg-info to /mnt/c/research/program/ADMM_with_ICNN_on_ROS/my_package/install/my_package/lib/python3.12/site-packages/my_package-0.0.0-py3.12.egg-info
+[2.085s] running install_scripts
+[2.231s] Installing multi_node_runner script to /mnt/c/research/program/ADMM_with_ICNN_on_ROS/my_package/install/my_package/lib/my_package
+[2.240s] writing list of installed files to '/mnt/c/research/program/ADMM_with_ICNN_on_ROS/my_package/build/my_package/install.log'
+[2.256s] Invoked command in '/mnt/c/research/program/ADMM_with_ICNN_on_ROS/my_package' returned '0': PS1=(myenv) \[\e]0;\u@\h: \w\a\]${debian_chroot:+($debian_chroot)}\[\033[01;32m\]\u@\h\[\033[00m\]:\[\033[01;34m\]\w\[\033[00m\]\$ PYTHONPATH=/mnt/c/research/program/ADMM_with_ICNN_on_ROS/my_package/build/my_package/prefix_override:/usr/lib/python3/dist-packages/colcon_core/task/python/colcon_distutils_commands:/mnt/c/research/program/ADMM_with_ICNN_on_ROS/my_package/install/my_package/lib/python3.12/site-packages:${PYTHONPATH} VIRTUAL_ENV_PROMPT=(myenv) /usr/bin/python3 -W ignore:setup.py install is deprecated -W ignore:easy_install command is deprecated setup.py egg_info --egg-base build/my_package build --build-base /mnt/c/research/program/ADMM_with_ICNN_on_ROS/my_package/build/my_package/build install --record /mnt/c/research/program/ADMM_with_ICNN_on_ROS/my_package/build/my_package/install.log --single-version-externally-managed install_data

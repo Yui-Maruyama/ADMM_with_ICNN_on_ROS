@@ -13,13 +13,22 @@ from ADMM_utils import *
 class UserNode(Node):
     def __init__(self, user_id: int, user_list: list, total_users: int, bandwidth, scene):
         super().__init__(f'user_{user_id}')
-        self.user_id = user_id
-        self.neighbor = user_list
-        self.bandwidth = bandwidth
+        # self.user_id = user_id
+        # self.neighbor = user_list
+        # self.bandwidth = bandwidth
 
-        self.topic_name = f'user_{self.user_id}/param'
-        self.publisher = self.create_publisher(Float32, self.topic_name, 10)
-        self.get_logger().info(f'Publishing to: {self.topic_name}')
+        # self.topic_name = f'user_{self.user_id}/param'
+        # self.publisher = self.create_publisher(Float32, self.topic_name, 10)
+        # self.get_logger().info(f'Publishing to: {self.topic_name}')
+
+        self.user_id = self.declare_parameter('user_id', 0).value
+        self.bandwidth = self.declare_parameter('bandwidth', {}).value
+        self.neighbors = self.declare_parameter('neighbors', []).value
+        self.total_users = self.declare_parameter('total_users', []).value
+        self.scene = self.declare_parameter('scene', 0).value
+
+
+        self.get_logger().info(f'User ID: {user_id}')
 
         # 他のユーザのトピックをサブスクライブ
         for other_user_id in self.neighbor:
@@ -32,7 +41,7 @@ class UserNode(Node):
         self.finished_pub = self.create_publisher(Int32, "finished_users", 10)
 
         # シーンとモデルの初期化
-        self.scene = scene
+        # self.scene = scene
         match self.scene:
             case 1:
                 self.model = myPICNN(22, 10, 100)
@@ -75,7 +84,7 @@ class UserNode(Node):
         self.optimizer = optim.Adam([self.x], lr=0.01)
 
         # 結果記載用ファイルの初期化
-        self.result_file_name = f"../result_user_{total_users}/user_{user_id}.txt"
+        self.result_file_name = f"../result_user_{self.total_users}/user_{user_id}.txt"
         with open(self.result_file_name, mode = 'w') as f:
             f.write(f"user {user_id}   scene:{self.scene}\n")
 

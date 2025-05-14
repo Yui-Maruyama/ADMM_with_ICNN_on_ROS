@@ -1,0 +1,2 @@
+[console_scripts]
+multi_node_runner = my_package.multi_node_runner:main
