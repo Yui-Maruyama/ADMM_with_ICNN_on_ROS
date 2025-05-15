@@ -7,7 +7,7 @@ package_name = 'my_package'
 setup(
     name=package_name,
     version='0.0.0',
-    packages=find_packages(exclude=['test']),
+    packages=find_packages(exclude=['tests*', 'numpy*']),
     data_files=[
         ('share/ament_index/resource_index/packages',
             ['resource/' + package_name]),
@@ -20,7 +20,7 @@ setup(
     maintainer_email='u451328k@ecs.osaka-u.ac.jp',
     description='TODO: Package description',
     license='TODO: License declaration',
-    tests_require=['pytest'],
+    # tests_require=['pytest'],
     entry_points={
     'console_scripts': [
         'multi_node_runner = my_package.multi_node_runner:main',

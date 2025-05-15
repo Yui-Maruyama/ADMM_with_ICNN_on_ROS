@@ -1,0 +1,51 @@
+running egg_info
+creating build/my_package/my_package.egg-info
+writing build/my_package/my_package.egg-info/PKG-INFO
+writing dependency_links to build/my_package/my_package.egg-info/dependency_links.txt
+writing entry points to build/my_package/my_package.egg-info/entry_points.txt
+writing requirements to build/my_package/my_package.egg-info/requires.txt
+writing top-level names to build/my_package/my_package.egg-info/top_level.txt
+writing manifest file 'build/my_package/my_package.egg-info/SOURCES.txt'
+reading manifest file 'build/my_package/my_package.egg-info/SOURCES.txt'
+writing manifest file 'build/my_package/my_package.egg-info/SOURCES.txt'
+running build
+running build_py
+creating /mnt/c/research/program/ADMM_with_ICNN_on_ROS/my_package/build/my_package/build
+creating /mnt/c/research/program/ADMM_with_ICNN_on_ROS/my_package/build/my_package/build/lib
+creating /mnt/c/research/program/ADMM_with_ICNN_on_ROS/my_package/build/my_package/build/lib/my_package
+copying my_package/ADMM_utils.py -> /mnt/c/research/program/ADMM_with_ICNN_on_ROS/my_package/build/my_package/build/lib/my_package
+copying my_package/multi_node_runner.py -> /mnt/c/research/program/ADMM_with_ICNN_on_ROS/my_package/build/my_package/build/lib/my_package
+copying my_package/PICNN.py -> /mnt/c/research/program/ADMM_with_ICNN_on_ROS/my_package/build/my_package/build/lib/my_package
+copying my_package/__init__.py -> /mnt/c/research/program/ADMM_with_ICNN_on_ROS/my_package/build/my_package/build/lib/my_package
+creating /mnt/c/research/program/ADMM_with_ICNN_on_ROS/my_package/build/my_package/build/lib/my_package/nodes
+copying my_package/nodes/UserNode.py -> /mnt/c/research/program/ADMM_with_ICNN_on_ROS/my_package/build/my_package/build/lib/my_package/nodes
+copying my_package/nodes/__init__.py -> /mnt/c/research/program/ADMM_with_ICNN_on_ROS/my_package/build/my_package/build/lib/my_package/nodes
+running install
+running install_lib
+creating /mnt/c/research/program/ADMM_with_ICNN_on_ROS/my_package/install/my_package/lib/python3.12/site-packages/my_package
+copying /mnt/c/research/program/ADMM_with_ICNN_on_ROS/my_package/build/my_package/build/lib/my_package/ADMM_utils.py -> /mnt/c/research/program/ADMM_with_ICNN_on_ROS/my_package/install/my_package/lib/python3.12/site-packages/my_package
+copying /mnt/c/research/program/ADMM_with_ICNN_on_ROS/my_package/build/my_package/build/lib/my_package/multi_node_runner.py -> /mnt/c/research/program/ADMM_with_ICNN_on_ROS/my_package/install/my_package/lib/python3.12/site-packages/my_package
+creating /mnt/c/research/program/ADMM_with_ICNN_on_ROS/my_package/install/my_package/lib/python3.12/site-packages/my_package/nodes
+copying /mnt/c/research/program/ADMM_with_ICNN_on_ROS/my_package/build/my_package/build/lib/my_package/nodes/UserNode.py -> /mnt/c/research/program/ADMM_with_ICNN_on_ROS/my_package/install/my_package/lib/python3.12/site-packages/my_package/nodes
+copying /mnt/c/research/program/ADMM_with_ICNN_on_ROS/my_package/build/my_package/build/lib/my_package/nodes/__init__.py -> /mnt/c/research/program/ADMM_with_ICNN_on_ROS/my_package/install/my_package/lib/python3.12/site-packages/my_package/nodes
+copying /mnt/c/research/program/ADMM_with_ICNN_on_ROS/my_package/build/my_package/build/lib/my_package/PICNN.py -> /mnt/c/research/program/ADMM_with_ICNN_on_ROS/my_package/install/my_package/lib/python3.12/site-packages/my_package
+copying /mnt/c/research/program/ADMM_with_ICNN_on_ROS/my_package/build/my_package/build/lib/my_package/__init__.py -> /mnt/c/research/program/ADMM_with_ICNN_on_ROS/my_package/install/my_package/lib/python3.12/site-packages/my_package
+byte-compiling /mnt/c/research/program/ADMM_with_ICNN_on_ROS/my_package/install/my_package/lib/python3.12/site-packages/my_package/ADMM_utils.py to ADMM_utils.cpython-312.pyc
+byte-compiling /mnt/c/research/program/ADMM_with_ICNN_on_ROS/my_package/install/my_package/lib/python3.12/site-packages/my_package/multi_node_runner.py to multi_node_runner.cpython-312.pyc
+byte-compiling /mnt/c/research/program/ADMM_with_ICNN_on_ROS/my_package/install/my_package/lib/python3.12/site-packages/my_package/nodes/UserNode.py to UserNode.cpython-312.pyc
+byte-compiling /mnt/c/research/program/ADMM_with_ICNN_on_ROS/my_package/install/my_package/lib/python3.12/site-packages/my_package/nodes/__init__.py to __init__.cpython-312.pyc
+byte-compiling /mnt/c/research/program/ADMM_with_ICNN_on_ROS/my_package/install/my_package/lib/python3.12/site-packages/my_package/PICNN.py to PICNN.cpython-312.pyc
+byte-compiling /mnt/c/research/program/ADMM_with_ICNN_on_ROS/my_package/install/my_package/lib/python3.12/site-packages/my_package/__init__.py to __init__.cpython-312.pyc
+running install_data
+creating /mnt/c/research/program/ADMM_with_ICNN_on_ROS/my_package/install/my_package/share/ament_index
+creating /mnt/c/research/program/ADMM_with_ICNN_on_ROS/my_package/install/my_package/share/ament_index/resource_index
+creating /mnt/c/research/program/ADMM_with_ICNN_on_ROS/my_package/install/my_package/share/ament_index/resource_index/packages
+copying resource/my_package -> /mnt/c/research/program/ADMM_with_ICNN_on_ROS/my_package/install/my_package/share/ament_index/resource_index/packages
+copying package.xml -> /mnt/c/research/program/ADMM_with_ICNN_on_ROS/my_package/install/my_package/share/my_package
+creating /mnt/c/research/program/ADMM_with_ICNN_on_ROS/my_package/install/my_package/share/my_package/launch
+copying launch/launcher.py -> /mnt/c/research/program/ADMM_with_ICNN_on_ROS/my_package/install/my_package/share/my_package/launch
+running install_egg_info
+Copying build/my_package/my_package.egg-info to /mnt/c/research/program/ADMM_with_ICNN_on_ROS/my_package/install/my_package/lib/python3.12/site-packages/my_package-0.0.0-py3.12.egg-info
+running install_scripts
+Installing multi_node_runner script to /mnt/c/research/program/ADMM_with_ICNN_on_ROS/my_package/install/my_package/lib/my_package
+writing list of installed files to '/mnt/c/research/program/ADMM_with_ICNN_on_ROS/my_package/build/my_package/install.log'

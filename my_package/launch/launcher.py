@@ -6,7 +6,8 @@ import os
 
 # launcherを使用，1ノード1プロセス
 def generate_launch_description():
-    venv_python = os.path.expanduser('/mnt/c/research/program/ADMM_with_ICNN_on_ROS/myenv/bin/python')
+    # 仮想環境のpythonのパスに合わせて変更してください
+    venv_python = os.path.expanduser('/mnt/c/research/program/ADMM_with_ICNN_on_ROS/ros2_jazzy_py312/bin/python')
 
     nodes = []
 
@@ -18,8 +19,8 @@ def generate_launch_description():
 
     # ユーザIDリスト（整数）をファイルから読み込む
     user_list = [i for i in range(num_usr)]
-    # neighbors = read_txt_to_2d_list(f"../neighbors_{num_usr}.txt")
-    neighbors = [[0]]
+    neighbors = read_txt_to_2d_list(f"../neighbors_{num_usr}.txt")
+    # neighbors = [[0]]
     #帯域制約
     bandwidth = [np.zeros(num_usr) for _ in range(num_usr)]
     for i in range(num_usr):
@@ -42,8 +43,8 @@ def generate_launch_description():
                 output='screen',
                 prefix=venv_python,  # ← ここで仮想環境の python を指定
                 parameters=[{
-                    # 'neighbors': neighbors[i],
-                    'neighbors': [0],
+                    'neighbors': neighbors[i],
+                    # 'neighbors': [0],
                     'bandwidth': bandwidth[i].tolist(),
                     'total_users': num_usr,
                     'scene': scenes[i],
