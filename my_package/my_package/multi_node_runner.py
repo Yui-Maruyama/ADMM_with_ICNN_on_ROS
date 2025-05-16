@@ -12,9 +12,12 @@ from my_package.nodes.UserNode import UserNode
 import argparse
 
 def main():
-    # parser = argparse.ArgumentParser()
-    # parser.add_argument('--user_id', type=int, required=True)
 
     rclpy.init()
 
     node = UserNode()
+    
+    rclpy.spin(node)  # 🔸これがないとトピックの受信処理が動かない！
+    
+    if rclpy.ok():
+        rclpy.shutdown()

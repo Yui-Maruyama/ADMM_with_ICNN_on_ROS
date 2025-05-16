@@ -52,8 +52,8 @@ def local_optimize(id, x, other_usages, mu, s, rho, optimizer, model, user_list,
             x.copy_(x.clamp(min=0.0, max=1.0))
             # x.clamp_(min=0.0, max=1.0)
 
-        if id == 7:
-            print(f"User {id}'s parameter: ", x)
+        # if id == 7:
+        #     print(f"User {id}'s parameter: ", x)
 
     return x.detach()
 
@@ -176,7 +176,7 @@ def update_score(model, x, mu, s, x_list, mu_list, s_list, scores, file_path, ti
     return scores, x_list, mu_list, s_list
 
 
-def is_converged(scores, iter, window_size=20, tol=1e-5):   #収束判定
+def is_converged(scores, iter, window_size=25, tol=1e-7):   #収束判定
     ret1 = False
     if(iter > window_size):   # 過去一定ステップ（デフォルト：20）の移動平均が1e-8以下の場合収束
         ma_now = np.sum([scores[len(scores) - window_size : len(scores)]]) / window_size

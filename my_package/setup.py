@@ -23,6 +23,7 @@ setup(
     # tests_require=['pytest'],
     entry_points={
     'console_scripts': [
+        'coordinator_node = my_package.coordinator_node:main',
         'multi_node_runner = my_package.multi_node_runner:main',
     ],
 }

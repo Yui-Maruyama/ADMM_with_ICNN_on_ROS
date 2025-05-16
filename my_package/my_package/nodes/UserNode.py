@@ -2,6 +2,8 @@ import rclpy
 from rclpy.node import Node
 from std_msgs.msg import Float32
 from std_msgs.msg import Int32
+from std_msgs.msg import String
+from std_msgs.msg import Bool
 import threading
 import time
 from my_package.PICNN import myPICNN
@@ -35,6 +37,7 @@ class UserNode(Node):
         self.declare_parameter('total_users', 0)
         self.declare_parameter('scene', 0)
         self.declare_parameter('user_id', -1)
+        self.declare_parameter('start_time', 0.0)
 
         # Retrieve the parameters
         self.neighbors = self.get_parameter('neighbors').get_parameter_value().integer_array_value
@@ -43,27 +46,25 @@ class UserNode(Node):
         self.total_users = self.get_parameter('total_users').get_parameter_value().integer_value
         self.scene = self.get_parameter('scene').get_parameter_value().integer_value
         self.user_id = self.get_parameter('user_id').get_parameter_value().integer_value
+        self.start_time = self.get_parameter('start_time').get_parameter_value().double_value
 
         self.get_logger().info(
             f"Started user {self.user_id} with neighbors={self.neighbors}, "
             f"bandwidth={self.bandwidth}, scene={self.scene}, total_users={self.total_users}")
 
 
-        self.get_logger().info(f'User ID: {self.user_id}')
+        # self.get_logger().info(f'User ID: {self.user_id}')
 
         self.topic_name = f'user_{self.user_id}/param'
         self.publisher = self.create_publisher(Float32, self.topic_name, 10)
-        self.get_logger().info(f'Publishing to: {self.topic_name}')
+        # self.get_logger().info(f'Publishing to: {self.topic_name}')
 
         # 他のユーザのトピックをサブスクライブ
         for other_user_id in self.neighbors:
             if other_user_id != self.user_id:
                 topic = f'user_{other_user_id}/param'
                 self.create_subscription(Float32, topic, self.create_callback(other_user_id), 10)
-                self.get_logger().info(f'Subscribed to: {topic}')
-
-        # 終了条件の通知用
-        self.finished_pub = self.create_publisher(Int32, "finished_users", 10)
+                # self.get_logger().info(f'Subscribed to: {topic}')
 
         # シーンとモデルの初期化
         # self.scene = scene
@@ -114,20 +115,59 @@ class UserNode(Node):
         with open(self.result_file_name, mode = 'w') as f:
             f.write(f"user {self.user_id}   scene:{self.scene}\n")
 
-        # 最適化ループ（とりあえず空）
+        # スタートを同期させる部分
+        # self.optimization_started = False
+        # self.optimization_thread = None
+        # フラグで /start を待機
+        self.start_event = threading.Event()
+
+        # startトピックのサブスクライバ
+        self.subscription = self.create_subscription(
+            Bool,
+            '/start',
+            self.start_callback,
+            10
+        )
+
+        # coordinator に準備完了を通知
+        ready_msg = Int32()
+        ready_msg.data = self.user_id
+        self.ready_pub = self.create_publisher(Int32, '/ready', 10)
+        self.ready_pub.publish(ready_msg)
+        self.get_logger().info(f'User {self.user_id} is ready.')
+
+        # 最適化スレッド開始（中で .wait() でブロック）
         self.optimization_thread = threading.Thread(target=self.optimization_loop)
         self.optimization_thread.start()
 
-        # 時間計測
-        self.start_time = time.time()
+        # 終了条件の通知用
+        self._finished = False
+        # self.finished_pub = self.create_publisher(Int32, "finished_users", 10)
+        # 毎秒終了判定を行うタイマー（メインスレッド側）
+        self.create_timer(1.0, self._check_shutdown)
+
+
 
     def create_callback(self, other_user_id):
         def callback(msg):
             if self.user_id == 100:
                 self.get_logger().info(f'Received from user_{other_user_id}: {msg.data}')
         return callback
+    
+    
+    # 最適化を開始するための関数
+    def start_callback(self, msg: Bool):
+        self.get_logger().info(f'Start signal received ({msg.data}). Beginning optimization...')
+        if msg.data:
+            # self.get_logger().info('Start signal received. Beginning optimization...')
+            self.start_event.set()
+
 
     def optimization_loop(self):
+        self.get_logger().info('Waiting for /start...')
+        self.start_event.wait()  # ブロックして待つ
+        self.get_logger().info('Start confirmed. Running optimization.')
+
         while rclpy.ok() and (not is_converged(self.scores, self.step)):
             # TODO: 最適化処理をここに記述
             # xの更新
@@ -153,14 +193,28 @@ class UserNode(Node):
 
             self.step += 1
         
-        msg = Int32()
-        msg.data = self.user_id
-        self.finished_pub.publish(msg)
+        # msg = Int32()
+        # msg.data = self.user_id
+        # self.finished_pub.publish(msg)
+        self._finished = True  # 🔸 終了フラグを立てる
         self.get_logger().info(f"User {self.user_id} finished. Shutting down.")
         # 1s 後に安全に destroy
         # self.create_timer(1.0, self._safe_shutdown)
-        self.destroy_node()
+        # self.destroy_node()
 
 
-    def _safe_shutdown(self):
-        self.destroy_node()
+    # 準備完了を管理ノードに通知
+    def publish_ready_once(self):
+        if not self.ready:
+            msg = String()
+            msg.data = self.user_id
+            self.ready_pub.publish(msg)
+            self.get_logger().info(f'{self.user_id} published ready.')
+            self.ready = True
+
+    
+    def _check_shutdown(self):
+        if self._finished:
+            self.get_logger().info("Shutting down node...")
+            self.destroy_node()
+            rclpy.shutdown()  # 🔸 これにより spin() が抜けてプログラム終了

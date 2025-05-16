@@ -3,6 +3,7 @@ from launch_ros.actions import Node
 import numpy as np
 import rclpy
 import os
+import time
 
 # launcherを使用，1ノード1プロセス
 def generate_launch_description():
@@ -11,7 +12,7 @@ def generate_launch_description():
 
     nodes = []
 
-    num_usr = 100   #ユーザ数
+    num_usr = 10   #ユーザ数
     np.random.seed(1)
     scenes = [np.random.randint(1, 4) for _ in range(num_usr)]
 
@@ -33,6 +34,24 @@ def generate_launch_description():
                 bandwidth[j][i] = b / 1000
                 # print(f"bandwidth constraint with user {i} and user {j}", bandwidth[i][j])
 
+    # 開始時刻（全ユーザ共通）
+    start_time = time.time()
+
+    # Coordinatorの起動
+    nodes.append(
+        Node(
+            package='my_package',
+            executable='coordinator_node',
+            name='coordinator_node',
+            output='screen',
+            prefix=venv_python,
+            parameters=[{
+                    'total_users': num_usr,
+                }]
+        )
+    )
+
+
     for i in range(num_usr):  # 100ノードを生成
 
         nodes.append(
@@ -48,7 +67,8 @@ def generate_launch_description():
                     'bandwidth': bandwidth[i].tolist(),
                     'total_users': num_usr,
                     'scene': scenes[i],
-                    'user_id': i
+                    'user_id': i,
+                    'start_time': start_time
                 }]
             )
         )
