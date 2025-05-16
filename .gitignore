@@ -1,0 +1,12 @@
+ros2_jazzy_py312/
+my_package/build
+my_package/install
+my_package/log
+build/
+install/
+log
+
+*.so
+*.pth
+*.pt
+*.onnx
