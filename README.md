@@ -21,7 +21,7 @@ pip install -U pip setuptools rclpy colcon-common-extensions torch numpy
 
 - 環境変数の設定
 ```bash
-export PYTHONPATH=PYTHONPATH=/opt/ros/jazzy/lib/python3.12/site-packages
+export PYTHONPATH=PYTHONPATH:/opt/ros/jazzy/lib/python3.12/site-packages
 export COLCON_PYTHON_EXECUTABLE=./ros2_jazzy_py312/bin/python3.12
 ```
 
@@ -32,7 +32,7 @@ colcon build
 
 - 以下を実行
 ```bash
-rops2 launch my_package launcher.py
+ros2 launch my_package launcher.py
 ```
 
 ユーザ数などの条件を書き換えた場合は以下を再実行
