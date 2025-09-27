@@ -17,4 +17,6 @@ def main():
     node = CoordinatorNode()
     rclpy.spin(node)
     node.destroy_node()
-    rclpy.shutdown()
+    # rclpy.ok() を使って、まだシャットダウンされていなければ実行する
+    if rclpy.ok():
+        rclpy.shutdown()

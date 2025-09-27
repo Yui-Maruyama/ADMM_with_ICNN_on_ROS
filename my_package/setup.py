@@ -25,6 +25,7 @@ setup(
     'console_scripts': [
         'coordinator_node = my_package.coordinator_node:main',
         'multi_node_runner = my_package.multi_node_runner:main',
+        'multi_node_runner_gpu = my_package.multi_node_runner_gpu:main',
     ],
 }
 )

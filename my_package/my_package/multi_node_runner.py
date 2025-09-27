@@ -9,6 +9,7 @@ except ImportError:
 import rclpy
 from rclpy.node import Node
 from my_package.nodes.UserNode import UserNode
+from my_package.nodes.UserNode_GPU import UserNode_GPU
 import argparse
 
 def main():
@@ -16,6 +17,7 @@ def main():
     rclpy.init()
 
     node = UserNode()
+    # node = UserNode_GPU()
     
     rclpy.spin(node)  # 🔸これがないとトピックの受信処理が動かない！
     

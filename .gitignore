@@ -1,11 +1,14 @@
-ros2_jazzy_py312/
-my_package/build
-my_package/install
-my_package/log
-build/
-install/
-log
+# すべてのビルド、インストール、ログディレクトリを無視
+**/build/
+**/install/
+**/log/
 
+# Pythonのキャッシュを無視
+**/__pycache__/
+*.pyc
+
+# ...その他のルールはそのまま...
+ros2_jazzy_py312/
 *.so
 *.pth
 *.pt

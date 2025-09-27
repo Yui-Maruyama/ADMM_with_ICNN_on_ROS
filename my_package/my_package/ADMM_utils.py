@@ -175,6 +175,23 @@ def update_score(model, x, mu, s, x_list, mu_list, s_list, scores, file_path, ti
 
     return scores, x_list, mu_list, s_list
 
+def update_score_GPU(model, x, mu, s, x_list, mu_list, s_list, scores, file_path, time, ctx = torch.tensor(1)) :
+    score = model(ctx.unsqueeze(0).float(), x.unsqueeze(0).float())
+    score = score.detach().cpu().numpy()[0]
+    scores.append(score)
+
+    # x_list.append(copy.deepcopy( x.detach().numpy() ))
+    x_list.append(copy.deepcopy(x.detach().cpu().numpy()))
+    mu_list.append(copy.deepcopy({user_id: tensor.detach() for user_id, tensor in mu.items()}))
+    s_list.append(copy.deepcopy({user_id: tensor.detach() for user_id, tensor in s.items()}))
+    # total_scores.append(sum_score)
+
+    # スコアをファイルに保存したい、後で追加
+    with open(file_path, mode = 'a') as f:
+        f.write(f"time: {time}, score: {score}\n")
+
+    return scores, x_list, mu_list, s_list
+
 
 def is_converged(scores, iter, window_size=25, tol=1e-7):   #収束判定
     ret1 = False

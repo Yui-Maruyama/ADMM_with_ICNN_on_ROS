@@ -57,7 +57,7 @@ def generate_launch_description():
         nodes.append(
             Node(
                 package='my_package',
-                executable='multi_node_runner',
+                executable='multi_node_runner_gpu',
                 name=f'user_{i}_node',
                 output='screen',
                 prefix=venv_python,  # ← ここで仮想環境の python を指定

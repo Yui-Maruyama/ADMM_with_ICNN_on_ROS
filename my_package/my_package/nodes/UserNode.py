@@ -57,6 +57,7 @@ class UserNode(Node):
 
         self.topic_name = f'user_{self.user_id}/param'
         self.publisher = self.create_publisher(Float32, self.topic_name, 10)
+        self.finished_pub = self.create_publisher(Int32, '/finished_users', 10)  #終了時通知用
         # self.get_logger().info(f'Publishing to: {self.topic_name}')
 
         # 他のユーザのトピックをサブスクライブ
@@ -214,7 +215,17 @@ class UserNode(Node):
 
     
     def _check_shutdown(self):
+        # if self._finished:
+        #     self.get_logger().info("Shutting down node...")
+        #     self.destroy_node()
+        #     rclpy.shutdown()  # 🔸 これにより spin() が抜けてプログラム終了
         if self._finished:
-            self.get_logger().info("Shutting down node...")
+            # 終了を通知
+            msg = Int32()
+            msg.data = self.user_id
+            self.finished_pub.publish(msg)
+            self.get_logger().info(f"Published finished signal for user {self.user_id}.")
+            
+            # ... 自身のノードを終了させる処理 ...
             self.destroy_node()
-            rclpy.shutdown()  # 🔸 これにより spin() が抜けてプログラム終了
+            rclpy.shutdown()
