@@ -31,13 +31,20 @@ colcon build
 source install/setup.bash
 ```
 
-- 以下を実行
+- 以下を実行(GPU使う場合はlauncher_GPUを使ってください)
 ```bash
 ros2 launch my_package launcher.py
+ros2 launch my_package launcher_GPU.py
 ```
 
 ユーザ数などの条件を書き換えた場合は以下を再実行
 ```bash
 rm -rf build/ install/ log/
 colcon build
+```
+
+ビルドから実行まで1個のシェルスクリプトにまとめたのでこっちを推奨(my_packageにあります)
+```bash
+./build.sh
+./build_GPU.sh
 ```
