@@ -9,6 +9,7 @@
 
 # ...その他のルールはそのまま...
 ros2_jazzy_py312/
+ros2_jazzy_py312_broken/
 *.so
 *.pth
 *.pt

@@ -58,6 +58,74 @@ def local_optimize(id, x, other_usages, mu, s, rho, optimizer, model, user_list,
     return x.detach()
 
 
+def local_optimize_newton(id, x, other_usages, mu, s, rho, model, user_list, max_capacities, bandwidth, lr=0.01, iter_inner=1, ctx=torch.tensor(1)):
+    """
+    ニュートン法を用いてローカル変数を最適化する関数
+    """
+    # 最適化対象のテンソルであることを確認
+    x.requires_grad_(True)
+
+    for i in range(iter_inner):
+        # 1. 勾配を手動でリセット
+        if x.grad is not None:
+            x.grad.zero_()
+
+        # --- 目的関数（損失）の計算（この部分は元のコードと同じ） ---
+        val = model(ctx.unsqueeze(0).float(), x.unsqueeze(0).float()) * (-1.0)
+        
+        for j in user_list:
+            other_usage = other_usages[j].clone().detach()
+            gij_val = g_ij(id, x, max_capacities, other_usage, bandwidth[j])
+            val = val + mu[j] * (gij_val + s[j])
+            val = val + (0.5 * rho) * ((gij_val + s[j]) ** 2)
+
+        loss = val.sum()
+        # --- ここまで ---
+        
+        # 2. 勾配を計算 (ヘッセ行列計算のために create_graph=True が必須)
+        loss.backward(create_graph=True)
+        grad = x.grad
+        if grad is None:
+            # xに対する勾配がない場合はスキップ
+            continue
+
+        # 3. ヘッセ行列を計算
+        # ヘッセ行列計算のためには、xを引数としスカラーを返す関数が必要
+        def objective_func(param):
+            val_ = model(ctx.unsqueeze(0).float(), param.unsqueeze(0).float()) * (-1.0)
+            for j_ in user_list:
+                other_usage_ = other_usages[j_].clone().detach()
+                gij_val_ = g_ij(id, param, max_capacities, other_usage_, bandwidth[j_])
+                val_ = val_ + mu[j_] * (gij_val_ + s[j_])
+                val_ = val_ + (0.5 * rho) * ((gij_val_ + s[j_]) ** 2)
+            return val_.sum()
+
+        hessian = torch.autograd.functional.hessian(objective_func, x)
+        H = hessian.squeeze()
+
+        # 4. ニュートン法の更新ステップを計算
+        try:
+            # 安定性のために微小な値を対角成分に加える
+            H_inv = torch.linalg.inv(H + 1e-6 * torch.eye(H.shape[0]))
+            update_step = H_inv @ grad
+        except torch.linalg.LinAlgError:
+            # 稀に逆行列が計算できない場合、そのステップは通常の勾配降下を行う
+            print(f"Warning: Hessian is singular for user {id}. Falling back to gradient descent.")
+            update_step = grad
+
+        # 5. パラメータを更新
+        with torch.no_grad():
+            x -= lr * update_step
+            
+        # 6. パラメータのクリッピング（元のコードと同じ）
+        with torch.no_grad():
+            x.copy_(x.clamp(min=0.0, max=1.0))
+
+        print(f"parameter after iteration {i+1}: {x}")
+
+    return x.detach()
+
+
 def g_ij(id, x, max_capacities, other_usage, bandwidth):
     # i:ユーザID
     # parami: そのユーザのパラメータ

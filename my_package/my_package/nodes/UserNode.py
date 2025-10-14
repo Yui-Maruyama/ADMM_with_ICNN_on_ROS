@@ -72,16 +72,24 @@ class UserNode(Node):
         match self.scene:
             case 1:
                 self.model = myPICNN(22, 10, 100)
-                self.model.load_state_dict(torch.load('../model/model_scene_1.pth'))
-                self.model.train()
+                # self.model.load_state_dict(torch.load('../model/model_scene_1.pth'))
+                # self.model.load_state_dict(torch.load('../model/model_scene_1_quantized.pth'))
+                self.model = torch.jit.load('../model/model_scene_1_quantized.pth')
+
             case 2:
                 self.model = myPICNN(16, 10, 100)
-                self.model.load_state_dict(torch.load('../model/model_scene_2.pth'))
-                self.model.train()
+                # self.model.load_state_dict(torch.load('../model/model_scene_2.pth'))
+                # self.model.load_state_dict(torch.load('../model/model_scene_2_quantized.pth'))
+                self.model = torch.jit.load('../model/model_scene_2_quantized.pth')
             case 3:
                 self.model = myPICNN(30, 10, 100)
-                self.model.load_state_dict(torch.load('../model/model_scene_3.pth'))
-                self.model.train()
+                # self.model.load_state_dict(torch.load('../model/model_scene_3.pth'))
+                # self.model.load_state_dict(torch.load('../model/model_scene_3_quantized.pth'))
+                self.model = torch.jit.load('../model/model_scene_3_quantized.pth')
+
+        self.model.train()
+        for param in self.model.parameters():
+            param.requires_grad = False
 
         #オブジェクトの容量読み込み
         self.max_capacities = []
@@ -173,9 +181,11 @@ class UserNode(Node):
             # TODO: 最適化処理をここに記述
             # xの更新
             # print(f"bandwidth constraints for user {self.user_id}: {self.bandwidth}")
-            x = local_optimize(self.user_id, self.x, self.other_usages, self.mu, self.s, self.rho, self.optimizer, self.model, self.neighbors, self.max_capacity, self.bandwidth)
+            # x = local_optimize(self.user_id, self.x, self.other_usages, self.mu, self.s, self.rho, self.optimizer, self.model, self.neighbors, self.max_capacity, self.bandwidth)
+            x_initial_guess = self.x.clone().detach().requires_grad_(True)
+            x = local_optimize_newton(self.user_id, self.x, self.other_usages, self.mu, self.s, self.rho, self.model, self.neighbors, self.max_capacity, self.bandwidth)
             self.x = x.clone().requires_grad_()
-            self.optimizer = optim.Adam([self.x], lr=0.01)
+            # self.optimizer = optim.Adam([self.x], lr=0.01)
 
             # sの更新
             self.s = update_s(self.user_id, self.s, self.mu, self.x, self.other_usages, self.neighbors, self.max_capacity, self.scene, self.rho, self.bandwidth)
