@@ -181,11 +181,9 @@ class UserNode(Node):
             # TODO: 最適化処理をここに記述
             # xの更新
             # print(f"bandwidth constraints for user {self.user_id}: {self.bandwidth}")
-            # x = local_optimize(self.user_id, self.x, self.other_usages, self.mu, self.s, self.rho, self.optimizer, self.model, self.neighbors, self.max_capacity, self.bandwidth)
-            x_initial_guess = self.x.clone().detach().requires_grad_(True)
-            x = local_optimize_newton(self.user_id, self.x, self.other_usages, self.mu, self.s, self.rho, self.model, self.neighbors, self.max_capacity, self.bandwidth)
+            x = local_optimize(self.user_id, self.x, self.other_usages, self.mu, self.s, self.rho, self.optimizer, self.model, self.neighbors, self.max_capacity, self.bandwidth)
             self.x = x.clone().requires_grad_()
-            # self.optimizer = optim.Adam([self.x], lr=0.01)
+            self.optimizer = optim.Adam([self.x], lr=0.01)
 
             # sの更新
             self.s = update_s(self.user_id, self.s, self.mu, self.x, self.other_usages, self.neighbors, self.max_capacity, self.scene, self.rho, self.bandwidth)
