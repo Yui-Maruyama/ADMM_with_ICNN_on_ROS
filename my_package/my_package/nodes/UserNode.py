@@ -72,20 +72,20 @@ class UserNode(Node):
         match self.scene:
             case 1:
                 self.model = myPICNN(22, 10, 100)
-                # self.model.load_state_dict(torch.load('../model/model_scene_1.pth'))
+                self.model.load_state_dict(torch.load('../model/model_scene_1.pth'))
                 # self.model.load_state_dict(torch.load('../model/model_scene_1_quantized.pth'))
-                self.model = torch.jit.load('../model/model_scene_1_quantized.pth')
+                # self.model = torch.jit.load('../model/model_scene_1_quantized.pth')
 
             case 2:
                 self.model = myPICNN(16, 10, 100)
-                # self.model.load_state_dict(torch.load('../model/model_scene_2.pth'))
+                self.model.load_state_dict(torch.load('../model/model_scene_2.pth'))
                 # self.model.load_state_dict(torch.load('../model/model_scene_2_quantized.pth'))
-                self.model = torch.jit.load('../model/model_scene_2_quantized.pth')
+                # self.model = torch.jit.load('../model/model_scene_2_quantized.pth')
             case 3:
                 self.model = myPICNN(30, 10, 100)
-                # self.model.load_state_dict(torch.load('../model/model_scene_3.pth'))
+                self.model.load_state_dict(torch.load('../model/model_scene_3.pth'))
                 # self.model.load_state_dict(torch.load('../model/model_scene_3_quantized.pth'))
-                self.model = torch.jit.load('../model/model_scene_3_quantized.pth')
+                # self.model = torch.jit.load('../model/model_scene_3_quantized.pth')
 
         self.model.train()
         for param in self.model.parameters():
