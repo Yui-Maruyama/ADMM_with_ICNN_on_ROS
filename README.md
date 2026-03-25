@@ -31,7 +31,7 @@ colcon build
 source install/setup.bash
 ```
 
-- 以下を実行(GPU使う場合はlauncher_GPUを使ってください)
+- my_package以下で以下のコードを実行(GPU使う場合はlauncher_GPUを使ってください)
 ```bash
 ros2 launch my_package launcher.py
 ros2 launch my_package launcher_GPU.py
